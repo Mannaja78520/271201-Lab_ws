@@ -175,7 +175,7 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_cylinder>
     </link>
-    <gazebo reference="back_left_wheel">
+    <gazebo reference="back_right_wheel">
         <material>Gazebo/Green</material>
     </gazebo>
     
