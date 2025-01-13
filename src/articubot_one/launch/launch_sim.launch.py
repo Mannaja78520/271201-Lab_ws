@@ -29,7 +29,7 @@ def generate_launch_description():
     gazebo = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
                     get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')]),
-             )
+    )
 
     # Run the spawner node from the gazebo_ros package. The entity name doesn't really matter if you only have a single robot.
     spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py',
@@ -37,6 +37,11 @@ def generate_launch_description():
                                    '-entity', 'my_bot'],
                         output='screen')
 
+    slam = IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory('slam_toolbox'),'launch','online_async_launch.py'
+                )]), launch_arguments={'use_sim_time': 'true'}.items()
+    )
 
 
     # Launch them all!
@@ -44,4 +49,5 @@ def generate_launch_description():
         rsp,
         gazebo,
         spawn_entity,
+        slam,
     ])
