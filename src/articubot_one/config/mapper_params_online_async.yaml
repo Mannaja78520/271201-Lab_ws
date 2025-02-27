@@ -5,7 +5,7 @@ slam_toolbox:
     solver_plugin: solver_plugins::CeresSolver
     ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
     ceres_preconditioner: SCHUR_JACOBI
-    ceres_trust_strategy: LEVENBERG_MARQUARDT
+    ceres_trust_strategy: LEVENBERG_MARQUARDsT
     ceres_dogleg_type: TRADITIONAL_DOGLEG
     ceres_loss_function: None
 
@@ -15,14 +15,15 @@ slam_toolbox:
     base_frame: base_footprint
     scan_topic: /scan
     use_map_saver: true
-    mode: mapping #localization
+    # mode: mapping #localization
+    mode: localization
 
     # if you'd like to immediately start continuing a map at a given pose
     # or at the dock, but they are mutually exclusive, if pose is given
     # will use pose
-    map_file_name: ./src/articubot_one/maps/myWorldMap.yaml
+    # map_file_name: /home/mannaja/coding/study/robotic2/271201-Lab_ws/src/articubot_one/maps/myWorldMap.yaml
     # map_start_pose: [0.0, 0.0, 0.0]
-    map_start_at_dock: true
+    # map_start_at_dock: true
 
     debug_logging: false
     throttle_scans: 1

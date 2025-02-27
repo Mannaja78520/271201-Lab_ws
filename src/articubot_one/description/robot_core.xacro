@@ -146,7 +146,7 @@
             <geometry>
                 <cylinder length="0.04" radius="0.05" />
             </geometry>
-            <material name="gray"/>
+            <material name="orange"/>
         </visual>
         <collision>
             <geometry>
@@ -158,7 +158,7 @@
         </xacro:inertial_cylinder>
     </link>
     <gazebo reference="back_left_wheel">
-        <material>Gazebo/Gray</material>
+        <material>Gazebo/Orange</material>
     </gazebo>
 
     <!-- BACK RIGHT WHEEL -->
