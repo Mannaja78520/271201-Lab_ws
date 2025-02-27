@@ -38,7 +38,6 @@ def generate_launch_description():
                                    '-x', '0', '-y', '0', '-z', '0.8',  # Set initial point
                                    '-R', '0', '-P', '0', '-Y', '1.57', # Set Rotage
                                    ],
-                        
                         output='screen')
 
     # Launch SLAM tool with parameters from the provided YAML file
