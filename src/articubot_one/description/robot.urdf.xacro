@@ -8,5 +8,4 @@
     <!-- <xacro:include filename="inclass_gazebo_control.xacro" /> -->
     <xacro:include filename="lidar.xacro" />
     <xacro:include filename="gripper.xacro" />
-
 </robot>

@@ -9,7 +9,7 @@ def generate_launch_description():
 
     # Package name
     package_name = 'articubot_one'  # Make sure this is your correct package name
-
+    
     # Path to the parameter file for SLAM
     slam_params = os.path.join(
         get_package_share_directory(package_name), 
@@ -64,13 +64,12 @@ def generate_launch_description():
             ('cmd_vel_out', 'diff_cont/cmd_vel_unstamped')  # Remap output topic
         ]
     )
-
-
+    
     # Launch them all!
     return LaunchDescription([
         rsp,
         gazebo,
         spawn_entity,
-        slam,
+        # slam,
         twist_mux,
     ])

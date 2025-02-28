@@ -44,7 +44,7 @@ def generate_launch_description():
         parameters=[params]
     )
 
-    rviz_config_file = os.path.join(pkg_path, 'config', 'test.rviz')
+    rviz_config_file = os.path.join(pkg_path, 'config', 'main.rviz')
     node_rviz2 = Node(
         package='rviz2',
         executable='rviz2',
@@ -61,7 +61,7 @@ def generate_launch_description():
             description='Use sim time if true'),
 
         node_robot_state_publisher,
-        node_joint_state_publisher_gui,
-        # node_joint_state_publisher,
+        # node_joint_state_publisher_gui,
+        node_joint_state_publisher,
         node_rviz2
     ])
