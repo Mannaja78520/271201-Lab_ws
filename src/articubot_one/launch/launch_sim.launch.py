@@ -47,6 +47,7 @@ def generate_launch_description():
                 )]), 
                 launch_arguments={'use_sim_time': 'true', 'params_file': slam_params}.items()
     )
+    
 
     # Node for twist_mux
     twist_mux = Node(
@@ -65,6 +66,16 @@ def generate_launch_description():
         ]
     )
     
+    
+    controller_manager = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "gripper_controller",
+        ],
+    )
+    
     # Launch them all!
     return LaunchDescription([
         rsp,
@@ -72,4 +83,5 @@ def generate_launch_description():
         spawn_entity,
         # slam,
         twist_mux,
+        controller_manager,
     ])

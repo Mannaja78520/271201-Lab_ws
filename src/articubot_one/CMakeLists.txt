@@ -43,7 +43,6 @@ install(
 
 install(PROGRAMS
   src/keyboard_control.py
-  src/gripper_control_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

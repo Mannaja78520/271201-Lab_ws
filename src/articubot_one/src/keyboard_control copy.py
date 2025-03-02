@@ -23,10 +23,13 @@ class keyboard_control(Node):
             Twist, 'cmd_vel', qos_profile=qos.qos_profile_system_default
         )
         
-        self.gripper_pub = self.create_publisher(
-            Float64MultiArray, 'gripper_controller/commands', qos_profile=qos.qos_profile_system_default
+        # self.gripper_pub = self.create_publisher(
+        #     Float64MultiArray, 'gripper_controller/commands', qos_profile=qos.qos_profile_system_default
+        # )
+        
+        self.gripper_action_client = ActionClient(
+            self, FollowJointTrajectory, '/gripper_controller/follow_joint_trajectory'
         )
-
         
         self.moveSpeed: float = 0.0
         self.slideSpeed: float = 0.0
@@ -37,11 +40,11 @@ class keyboard_control(Node):
         self.plusSpeedSize: float = 0.01
         self.maxSpeed : float = 3.0 # m/s
         
-        self.gripperSlideVel: float = 0.0
-        self.gripperUpDownVel: float = 0.0
-        self.maxGripperSlideVel: float = 0.5
-        self.maxGripperUpDownVel: float = 0.5
-        self.gripperIncrement: float = 0.1
+        self.gripperSlidePos: float = 0.0
+        self.gripperUpDownPos: float = 0.0
+        self.maxGripperSlidePos: float = 0.1
+        self.maxGripperUpDownPos: float = 0.13
+        self.gripperIncrement: float = 0.005
         
         self.show_log()
         self.get_logger().info("Keyboard publisher started. Press keys to send messages. Press 'p' to quit.")
@@ -74,7 +77,7 @@ class keyboard_control(Node):
             "Keyboard publisher started. Press keys to send messages. Press 'p' to quit.\n"
             f"Current Speeds: Move={self.moveSpeed:.2f}, Slide={self.slideSpeed:.2f}, Turn={self.turnSpeed:.2f}\n"
             f"Current Speed increment: Move={self.plusMoveSpeed:.2f}, Slide={self.plusSlideSpeed:.2f}, Turn={self.plusturnSpeed:.2f}"
-            f"\nCurrent Gripper Velocity: Slide={self.gripperSlideVel:.2f}, Up/Down={self.gripperUpDownVel:.2f}"
+            f"\nCurrent Gripper positions: Slide={self.gripperSlidePos:.2f}, Up/Down={self.gripperUpDownPos:.2f}"
         )
 
         # Log the combined message
@@ -96,19 +99,16 @@ class keyboard_control(Node):
             self.turnSpeed = 0.0
 
         if key == '4' or key == '6' or key == '8' or key == '2' or key == '5':
-            self.gripperSlideVel = self.gripperSlideVel + self.gripperIncrement if key == '4' else self.gripperSlideVel - self.gripperIncrement if key == '6' else self.gripperSlideVel
-            self.gripperUpDownVel = self.gripperUpDownVel + self.gripperIncrement if key == '8' else self.gripperUpDownVel - self.gripperIncrement if key == '2' else self.gripperUpDownVel
+            self.gripperSlidePos = self.gripperSlidePos + self.gripperIncrement if key == '4' else self.gripperSlidePos - self.gripperIncrement if key == '6' else self.gripperSlidePos
+            self.gripperUpDownPos = self.gripperUpDownPos + self.gripperIncrement if key == '8' else self.gripperUpDownPos - self.gripperIncrement if key == '2' else self.gripperUpDownPos
 
-            self.gripperSlideVel = self.clip(self.gripperSlideVel, -self.maxGripperSlideVel, self.maxGripperSlideVel)
-            self.gripperUpDownVel = self.clip(self.gripperUpDownVel, -self.maxGripperUpDownVel, self.maxGripperUpDownVel)
+            self.gripperSlidePos = self.clip(self.gripperSlidePos, 0, self.maxGripperSlidePos)
+            self.gripperUpDownPos = self.clip(self.gripperUpDownPos, 0, self.maxGripperUpDownPos)
             
             if key == '5':  # Reset Gripper to default position
-                self.gripperSlideVel = 0.0
-                self.gripperUpDownVel = 0.0
-                
-            gripper_vel_msg = Float64MultiArray()
-            gripper_vel_msg.data = [float(self.gripperUpDownVel), float(self.gripperSlideVel), float(-self.gripperSlideVel)]
-            self.gripper_pub.publish(gripper_vel_msg)
+                self.gripperSlidePos = 0.0
+                self.gripperUpDownPos = 0.0
+            self.send_gripper_action([float(self.gripperUpDownPos), float(self.gripperSlidePos), float(-self.gripperSlidePos)])
                 
 
         # Clip values
@@ -118,6 +118,25 @@ class keyboard_control(Node):
         self.plusMoveSpeed = self.clip(self.plusMoveSpeed, 0, self.maxSpeed)
         self.plusSlideSpeed = self.clip(self.plusSlideSpeed, 0, self.maxSpeed)
         self.plusturnSpeed = self.clip(self.plusturnSpeed, 0, self.maxSpeed)
+        
+    def send_gripper_action(self, positions):
+        """Sends an action goal to control the gripper."""
+        if not self.gripper_action_client.wait_for_server(timeout_sec=5.0):
+            self.get_logger().error("Gripper action server not available!")
+            return
+        
+        goal_msg = FollowJointTrajectory.Goal()
+        goal_msg.trajectory.joint_names = ['gripper_vertical_joint', 'gripper_finger_left_joint', 'gripper_finger_right_joint']
+        
+        point = JointTrajectoryPoint()
+        point.positions = positions
+        point.time_from_start.sec = 0
+        point.time_from_start.nanosec = 250000
+
+        goal_msg.trajectory.points.append(point)
+
+        self.get_logger().info(f"Sending gripper action: {positions}")
+        self.gripper_action_client.send_goal_async(goal_msg)
         
     def get_key(self):
         """Reads a single key without waiting for Enter."""
@@ -149,7 +168,7 @@ class keyboard_control(Node):
         cmd_vel_msg.angular.z   = float(self.turnSpeed)
         
         # gripper_pos_msg = Float64MultiArray()
-        # gripper_pos_msg.data = [float(self.gripperUpDownVel), float(self.gripperSlideVel), float(-self.gripperSlideVel)]
+        # gripper_pos_msg.data = [float(self.gripperUpDownPos), float(self.gripperSlidePos), float(-self.gripperSlidePos)]
         
         self.keyboard_pub.publish(keyboard_msg)
         self.cmd_vel_pub.publish(cmd_vel_msg)
